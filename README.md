@@ -1,18 +1,18 @@
 # WCF Demo App
 
-This basic 2 tier demo app can be used as a sample app to learn how to build and deploy Azure Cloud Services.
+This basic 2 tier demo app can be used as a sample to learn how to build and deploy Azure Cloud Services for WCF & ASP.NET.
 
 ## Local Setup
 
 * You will need a SQL server
     * Don't have one? You can create one in Azure (see *Step 3* below)
-* Next you will need to create a database and execute the `Resources\dbo.Products.sql` queries against it to populate the database
+* IF using this sample solution you will need to create a database and execute the `Resources\dbo.Products.sql` script against it to populate the database
 * Then you will need to rename `DemoWCFService\ConnectionStrings - Sample.config` to `DemoWCFService\ConnectionStrings.config` and configure it appropriately for your database connection
-* However you chose to host your local WCF service you will need to edit `DemoWebApp\web.config` and set the correct client endpoint
+* However you chose to host your local WCF service you will need to edit `DemoWebApp\web.config` and set the correct client endpoint.
 
 ## Testing
 
-* If all goes well you should be able to run both the WCF service & the web app and see a listing of 3 products
+* If all goes well you should be able to run both the WCF service & the web app and see a listing of 3 products.
 
 ## Converting to Azure Cloud Services
 
@@ -202,3 +202,58 @@ This basic 2 tier demo app can be used as a sample app to learn how to build and
 > Note: This will deploy your cloud service with the desired number of web roles (which are your WCF services) and automatically setup a load balancer for them on the configured endpoint. Should any instances ever fail, Azure will automatically re-deploy a new one using the last published package.
 
 >  You can use the same `WcfTestClient.exe` tool (as mentioned above) to test your new cloud hosted WCF service.
+
+
+### Step 6: Create a Cloud Service for your Web App (ASP.NET MVC)
+
+1. Create a Cloud Service in the [Preview Portal](https://portal.azure.com) in the resource group created above
+1. Click `+ New` > `Compute` > `Cloud Service` and finally **Create**
+1. Enter a `DNS Name` for your cloud service
+    * e.g. *"webdemoapp"*
+1. If you have multiple `Subscriptions` select the appropriate one
+1. Click `Resource group` & select the resource group you created in *Step 1*.
+1. Ensure that the `location` for your cloud service matches that of your resource group
+1. Click **Create**
+
+
+#### Step 6a: Create a Cloud Service Solution in Visual Studio for the Web Application
+
+1. Open Visual Studio (2013 or 2015)
+1. Click `File` > `New` > `Project`
+1. Under `Templates` click `Cloud` then `Azure Cloud Service`
+1. Supply a Name for your project & for your solution
+    * e.g. *"WWWCloudService"*
+1. Click `OK`
+1. Do NOT add any roles
+1. Click `OK`
+1. Right click on your `Solution` and click `Add` > `Existing Project`
+    * Navigate to your web project `WCFDemoApp\DemoWebApp\DemoWebApp.csproj` and click on the file then click `Open`
+1. In your **Cloud Service** project right click on `Roles` and select `Add` > `Web Role Project in Solution`
+1. Select your **Web App** and click `OK`
+
+#### Step 6b: Modify your web.config
+
+> Depending on how you manage your environments and configuration files you will need to ensure you have updated the web.config file for your web application to use the Azure hosted WCF Service and not your local one. 
+
+> For simplicity sake we'll just edit the web apps web.config
+
+1. Open the `web.config` file for your web application
+1. Change the end `endpoint address` to point to your Azure Cloud Service enpoint for your recently deployed WCF Web Role.
+
+#### Step 6c: Publish your Web App Cloud Service
+
+1. Right click on your `Cloud Service` project and select **Publish**
+1. If promted either add your account or enter your credentials for Azure
+1. Select the appropriate **subscription** and tap **Next >**
+1. For **Cloud Service** select the service you created in **Step 5** (The Cloud Service for your web app, not your WCF API)
+1. For **Environment** select the appropriate one, for initial testing **Production** is fine
+1. For **Build configuration** select the appropriate one (you may want to use *Debug* if you anticipate any issues, but use *Release* for any perf/load testing)
+1. For **Service Configuration** select **Cloud**
+1. Tap **Next >** then **Publish**
+
+> Note: This will deploy your cloud service with the desired number of web roles (which are your WCF services) and automatically setup a load balancer for them on the configured endpoint. Should any instances ever fail, Azure will automatically re-deploy a new one using the last published package.
+
+
+### Step 7: Test
+
+> You should now be able to connect to your Azure Hosted Cloud Service Web App and start testing everything!
